@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using CloudinaryDotNet.Actions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -104,6 +105,47 @@ namespace CloudinaryDotNet
                 task2.Wait();
                 if (task2.IsFaulted) { throw task2.Exception; }
                 response = task2.Result;
+
+                if (task2.IsCanceled) { }
+                if (task2.IsFaulted) { throw task2.Exception; }
+
+                return response;
+            }
+
+        }
+
+        /// <summary>
+        /// Custom call to cloudinary API
+        /// </summary>
+        /// <param name="method">HTTP method of call</param>
+        /// <param name="url">URL to call</param>
+        /// <param name="parameters">Dictionary of call parameters (can be null)</param>
+        /// <param name="file">File to upload (must be null for non-uploading actions)</param>
+        /// <param name="extraHeaders">Headers to add to the request</param>
+        /// <returns>HTTP response on call</returns>
+        public async Task<HttpResponseMessage> AsyncCall(HttpMethod method, string url, SortedDictionary<string, object> parameters, FileDescription file, Dictionary<string, string> extraHeaders = null)
+        {
+            var request = RequestBuilder(url);
+            HttpResponseMessage response = null;
+            using (request)
+            {
+                PrepareRequestBody(ref request, method, parameters, file, extraHeaders);
+
+                System.Threading.Tasks.Task<HttpResponseMessage> task2;
+
+                if (Timeout > 0)
+                {
+                    var cancellationTokenSource = new CancellationTokenSource(Timeout);
+                    task2 = client.SendAsync(request, cancellationTokenSource.Token);
+                }
+                else
+                {
+                    task2 = client.SendAsync(request);
+                }
+
+                task2.Wait();
+                if (task2.IsFaulted) { throw task2.Exception; }
+                response = await task2;
 
                 if (task2.IsCanceled) { }
                 if (task2.IsFaulted) { throw task2.Exception; }
@@ -366,6 +408,52 @@ namespace CloudinaryDotNet
             return result;
         }
 
+        /// <summary>
+        /// Parses HTTP response and creates new instance of this class
+        /// </summary>
+        /// <param name="response">HTTP response</param>
+        /// <returns>New instance of this class</returns>
+        internal static async Task<T> AsyncParse<T>(Object response) where T : BaseResult, new()
+        {
+            if (response == null)
+                throw new ArgumentNullException("response");
+
+            HttpResponseMessage message = (HttpResponseMessage)response;
+
+            T result;
+
+            using (Stream stream = await message.Content.ReadAsStreamAsync())
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string s = reader.ReadToEnd();
+                result = JsonConvert.DeserializeObject<T>(s);
+                result.JsonObj = JToken.Parse(s);
+            }
+
+            if (message.Headers != null)
+                foreach (var header in message.Headers)
+                {
+                    if (header.Key.StartsWith("X-FeatureRateLimit"))
+                    {
+                        long l;
+                        DateTime t;
+
+                        if (header.Key.EndsWith("Limit") && long.TryParse(header.Value.First(), out l))
+                            result.Limit = l;
+
+                        if (header.Key.EndsWith("Remaining") && long.TryParse(header.Value.First(), out l))
+                            result.Remaining = l;
+
+                        if (header.Key.EndsWith("Reset") && DateTime.TryParse(header.Value.First(), out t))
+                            result.Reset = t;
+                    }
+                }
+
+            result.StatusCode = message.StatusCode;
+
+            return result;
+        }
+
         public override T CallAndParse<T>(HttpMethod method, string url, SortedDictionary<string, object> parameters, FileDescription file,
             Dictionary<string, string> extraHeaders = null)
         {
@@ -376,6 +464,20 @@ namespace CloudinaryDotNet
                 extraHeaders))
             {
                 return Parse<T>(response);
+            }
+        }
+
+        public async Task<T> AsyncCallAndParse<T>(HttpMethod method, string url, SortedDictionary<string, object> parameters, FileDescription file,
+            Dictionary<string, string> extraHeaders = null)  where T : BaseResult, new()
+        {
+            using (var response = await AsyncCall(method,
+                url,
+                parameters,
+                file,
+                extraHeaders))
+            {
+                var result = await AsyncParse<T>(response);
+                return result;
             }
         }
     }
