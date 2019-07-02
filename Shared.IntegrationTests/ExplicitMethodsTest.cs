@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using ApprovalTests.Reporters;
+using ApprovalUtilities.Utilities;
 using CloudinaryDotNet.Actions;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace CloudinaryDotNet.IntegrationTest.UploadApi
@@ -103,10 +108,17 @@ namespace CloudinaryDotNet.IntegrationTest.UploadApi
         }
 
         [Test]
-        public void TestFaceCoordinates()
+        [UseReporter(typeof(DiffReporter))] // is needed for ApprovalTests
+        public void should_allow_sending_face_coordinates()
         {
-            //should allow sending face coordinates
+            // This is our proposal regarding naming of the tests. It does not follow
+            // the C# naming convention for the methods, however if we treat them as
+            // not regular methods, but test scenarios, it makes perfect sense. 
+            // Such naming provide much better context that helps developer to understand
+            // what test actually tests
 
+            ////should allow sending face coordinates
+            //`
             var faceCoordinates = new List<CloudinaryDotNet.Core.Rectangle>()
             {
                 new CloudinaryDotNet.Core.Rectangle(121,31,110,151),
@@ -123,16 +135,34 @@ namespace CloudinaryDotNet.IntegrationTest.UploadApi
 
             var uploadRes = m_cloudinary.Upload(uploadParams);
 
-            Assert.NotNull(uploadRes.Faces);
-            Assert.AreEqual(2, uploadRes.Faces.Length);
-            Assert.AreEqual(4, uploadRes.Faces[0].Length);
-            for (int i = 0; i < 2; i++)
+            //Assert.NotNull(uploadRes.Faces);               // old
+            uploadRes.Faces                                // new
+                .Should().NotBeNull();
+
+            //Assert.AreEqual(2, uploadRes.Faces.Length);    // old
+            uploadRes.Faces                                // new
+                .Should().HaveCount(2);
+
+            //Assert.AreEqual(4, uploadRes.Faces[0].Length);
+            uploadRes.Faces[0]
+                .Should().HaveCount(4);
+
+            for (int i = 0; i < 2; i++)                                                // old
             {
                 Assert.AreEqual(faceCoordinates[i].X, uploadRes.Faces[i][0]);
                 Assert.AreEqual(faceCoordinates[i].Y, uploadRes.Faces[i][1]);
                 Assert.AreEqual(faceCoordinates[i].Width, uploadRes.Faces[i][2]);
                 Assert.AreEqual(faceCoordinates[i].Height, uploadRes.Faces[i][3]);
             }
+
+            faceCoordinates
+                .Should().Equal(uploadRes.Faces,
+                    (coord, face) =>                                                  // new
+                        coord.X == face[0]
+                        && coord.Y == face[1]
+                        && coord.Width == face[2]
+                        && coord.Height == face[3]
+                );
 
             var explicitParams = new ExplicitParams(uploadRes.PublicId)
             {
@@ -146,13 +176,50 @@ namespace CloudinaryDotNet.IntegrationTest.UploadApi
             var res = m_cloudinary.GetResource(
                 new GetResourceParams(uploadRes.PublicId) { Faces = true });
 
-            Assert.NotNull(res.Faces);
-            Assert.AreEqual(1, res.Faces.Length);
-            Assert.AreEqual(4, res.Faces[0].Length);
-            Assert.AreEqual(122, res.Faces[0][0]);
-            Assert.AreEqual(32, res.Faces[0][1]);
-            Assert.AreEqual(111, res.Faces[0][2]);
-            Assert.AreEqual(152, res.Faces[0][3]);
+            //Assert.NotNull(res.Faces);                                      // old
+            //Assert.AreEqual(1, res.Faces.Length);
+            //Assert.AreEqual(4, res.Faces[0].Length);
+            //Assert.AreEqual(122, res.Faces[0][0]);
+            //Assert.AreEqual(32, res.Faces[0][1]);
+            //Assert.AreEqual(111, res.Faces[0][2]);
+            //Assert.AreEqual(152, res.Faces[0][3]);
+
+            // this single line takes the text representation of the object and
+            // compares it with the one saved in file <class>.<method>.approved.txt
+            // if they are the same, test passes
+            // if they are different, test fails and assigned reporter is executed
+            // in this example the reporter is a diff reporter. It runs the default
+            // system diff editor, showing both objects and highlighting the 
+            // differences between them
+            // try to change the test and run it
+            ApprovalTests.Approvals.Verify(NormalizeVolatileProperties(res).JsonObj);  // new
+        }
+
+        /// <summary>
+        /// This method replaces properties that differ from call to call with fixed values 
+        /// </summary>
+        /// <param name="res"></param>
+        /// <returns></returns>
+        private GetResourceResult NormalizeVolatileProperties(GetResourceResult res)
+        {
+            // quick and dirty normalization
+            Normalize(res, nameof(res.PublicId));
+            Normalize(res, nameof(res.Version));
+            Normalize(res, "created_at");
+            Normalize(res, nameof(res.Url));
+            Normalize(res, nameof(res.SecureUrl));
+            Normalize(res, nameof(res.Tags));
+            Normalize(res, nameof(res.NextCursor));
+            return res;
+        }
+
+        public static string ToSnakeCase(string str) => 
+            string.Concat(str.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
+
+        private void Normalize (BaseResult obj, string propertyName)
+        {
+            var jsonName = ToSnakeCase(propertyName);
+            obj.JsonObj[jsonName] = jsonName;
         }
 
         [Test]

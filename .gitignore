@@ -75,3 +75,6 @@ UpgradeLog*.htm
 *snk
 
 .idea/
+
+# approvaltests received
+*.received.*

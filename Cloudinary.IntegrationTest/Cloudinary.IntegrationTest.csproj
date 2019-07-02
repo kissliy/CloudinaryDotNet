@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Cloudinary.IntegrationTest</RootNamespace>
     <AssemblyName>Cloudinary.IntegrationTest</AssemblyName>
-    <TargetFramework>net40</TargetFramework>
+    <TargetFramework>net47</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -37,6 +37,8 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <EnableDefaultItems>false</EnableDefaultItems>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
+    <ApplicationIcon />
+    <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,6 +65,8 @@
     <DefineConstants>SIGN_ASSEMBLY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="approvaltests" Version="4.0.0" />
+    <PackageReference Include="fluentassertions" Version="5.7.0" />
     <PackageReference Include="Moq" Version="4.2.1510.2205" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.*" />
     <PackageReference Include="NUnit" Version="3.10.*" />

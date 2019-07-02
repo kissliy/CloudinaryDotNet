@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>Cloudinary.NetCoreIntegrationTest</AssemblyName>
     <PackageId>Cloudinary.NetCoreTest</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50;dnx451</PackageTargetFallback>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -19,6 +18,8 @@
     <DefineConstants>SIGN_ASSEMBLY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="approvaltests" Version="4.0.0" />
+    <PackageReference Include="fluentassertions" Version="5.7.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="Moq" Version="4.8.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.*" />

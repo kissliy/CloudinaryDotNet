@@ -66,7 +66,7 @@
     <PackageReference Include="Moq" Version="4.2.1510.2205" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.*" />
     <PackageReference Include="NUnit" Version="3.10.*" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.10.*" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />

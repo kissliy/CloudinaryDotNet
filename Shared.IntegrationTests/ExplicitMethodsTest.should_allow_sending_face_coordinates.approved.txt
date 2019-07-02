@@ -1,0 +1,29 @@
+﻿{
+  "public_id": "public_id",
+  "format": "jpg",
+  "version": "version",
+  "resource_type": "image",
+  "type": "upload",
+  "created_at": "created_at",
+  "bytes": 93502,
+  "width": 1920,
+  "height": 1200,
+  "access_mode": "public",
+  "url": "url",
+  "secure_url": "secure_url",
+  "tags": "tags",
+  "next_cursor": "next_cursor",
+  "derived": [],
+  "faces": [
+    [
+      122,
+      32,
+      111,
+      152
+    ]
+  ],
+  "pages": 1,
+  "usage": {},
+  "original_filename": "TestImage",
+  "etag": "84b34ab27ab67096604a99db81d17eac"
+}
