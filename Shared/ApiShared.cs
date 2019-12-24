@@ -337,6 +337,11 @@
         public Url ApiUrlStreamingProfileV => ApiUrlV.Add(Constants.STREAMING_PROFILE_API_URL);
 
         /// <summary>
+        /// Default cloudinary API URL for metadata fields.
+        /// </summary>
+        public Url ApiUrlMetadataFieldV => ApiUrlV.Add(Constants.METADATA_FIELDS_API_URL);
+
+        /// <summary>
         /// Default cloudinary API URL for uploading images with version.
         /// </summary>
         public Url ApiUrlImgUpV

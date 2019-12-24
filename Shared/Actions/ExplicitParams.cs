@@ -103,6 +103,11 @@ namespace CloudinaryDotNet.Actions
         public StringDictionary Context { get; set; }
 
         /// <summary>
+        /// A list of custom metadata fields (by external_id) and the values to assign to each of them.
+        /// </summary>
+        public StringDictionary Metadata { get; set; }
+
+        /// <summary>
         /// Requests that Cloudinary automatically find the best breakpoints from the array of breakpoint request
         /// settings.
         /// </summary>

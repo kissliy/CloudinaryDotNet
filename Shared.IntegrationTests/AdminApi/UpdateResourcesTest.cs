@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using CloudinaryDotNet.Actions;
@@ -266,6 +267,40 @@ namespace CloudinaryDotNet.IntegrationTest.AdminApi
             Assert.NotNull(updateResult.Moderation);
             Assert.AreEqual(1, updateResult.Moderation.Count);
             Assert.AreEqual(ModerationStatus.Approved, updateResult.Moderation[0].Status);
+        }
+
+        [Test]
+        public void TestUpdateMetadata()
+        {
+            var uploadResult = m_cloudinary.Upload(new ImageUploadParams
+            {
+                File = new FileDescription(m_testImagePath),
+            });
+
+            var metadataLabel = GetUniqueMetadataFieldLabel("resource_update");
+            var metadataParameters = new StringMetadataFieldCreateParams(metadataLabel);
+            var metadataResult = m_cloudinary.AddMetadataField(metadataParameters);
+
+            Assert.NotNull(metadataResult);
+
+            var metadataFieldId = metadataResult.ExternalId;
+            if (!string.IsNullOrEmpty(metadataFieldId))
+                m_metadataFieldsToClear.Add(metadataFieldId);
+
+            const string metadataValue = "test value";
+            var metadata = new StringDictionary
+            {
+                {metadataFieldId, metadataValue}
+            };
+
+            var updateResult = m_cloudinary.UpdateResource(new UpdateParams(uploadResult.PublicId)
+            {
+                Metadata = metadata
+            });
+
+            Assert.NotNull(updateResult);
+            Assert.AreEqual(HttpStatusCode.OK, updateResult.StatusCode);
+            Assert.NotNull(updateResult.MetadataFields);
         }
     }
 }

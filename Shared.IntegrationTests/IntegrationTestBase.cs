@@ -85,6 +85,7 @@ namespace CloudinaryDotNet.IntegrationTest
         protected Dictionary<StorageType, List<string>> m_publicIdsToClear;
         protected List<object> m_transformationsToClear;
         protected List<string> m_presetsToClear;
+        protected List<string> m_metadataFieldsToClear;
 
         protected enum StorageType { text, sprite, multi, facebook, upload }
 
@@ -114,6 +115,7 @@ namespace CloudinaryDotNet.IntegrationTest
 
             m_transformationsToClear = new List<object>();
             m_presetsToClear = new List<string>();
+            m_metadataFieldsToClear = new List<string>();
 
             InitializeUniqueNames(assembly.GetName().Name);
         }
@@ -359,6 +361,14 @@ namespace CloudinaryDotNet.IntegrationTest
 
         #endregion
 
+        protected string GetUniqueMetadataFieldLabel(string suffix = "")
+        {
+            var label = $"{m_apiTest}_meta_data_label_{m_metadataFieldsToClear.Count + 1}";
+            if (!string.IsNullOrEmpty(suffix))
+                label = $"{label}_{suffix}";
+            return label;
+        }
+
         [OneTimeTearDown]
         public virtual void Cleanup()
         {
@@ -389,6 +399,7 @@ namespace CloudinaryDotNet.IntegrationTest
 
             m_transformationsToClear.ForEach(t => m_cloudinary.DeleteTransform(t.ToString()));
             m_presetsToClear.ForEach(p => m_cloudinary.DeleteUploadPreset(p));
+            m_metadataFieldsToClear.ForEach(p => m_cloudinary.DeleteMetadataField(p));
         }
     }
 
